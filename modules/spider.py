@@ -18,6 +18,7 @@ class Spider(object):
 		self.cookie = cookie
 		self.target_url = url
 		self.visited_urls = []
+		self.output_forms = []
 		self.visit_urls = []
 		self.printed_action = []
 		self.target_domain = self.get_domain(self.target_url)
@@ -42,6 +43,7 @@ class Spider(object):
 			return "http://{}/{}".format(self.target_domain, link)
 
 	def print_forms(self, forms):
+		_form = ""
 		print("{1}Page Title:{2} {3}{0}{2}".format(self.browser.page_title,
 												   B_BLUE, RESET, GREEN))
 		print("{1}Set-Cookie:{2} {3}{0}{2}".format(self.browser.set_cookie,
@@ -52,13 +54,18 @@ class Spider(object):
 			print("-"*30+"<FORM>"+"-"*30)
 			print("{1}Page URL :{2} {3}{0}{2}".format(i['url'], B_BLUE, RESET,
 			 										  GREEN))
-			print("{1}ACTION:{2} {3}{0}{2}".format(i['form_action'].upper(),
+			print("{1}ACTION:{2} {3}{0}{2}".format(i['form_action'].lower(),
 												   B_BLUE, RESET, GREEN))
 			print("{1}METHOD:{2} {3}{0}{2}".format(i['form_method'].upper(),
 												   B_BLUE, RESET, GREEN))
-
+			_form += "Page Title: {}\n".format(self.browser.page_title)
+			_form += "Set-Cookie: {}\n".format(self.browser.set_cookie)
+			_form += "Page Url: {}\n".format(i['url'])
+			_form += "ACTION: {}\n".format(i['form_action'].lower())
+			_form += "METHOD: {}\n".format(i['form_method'].upper())
 			for input in i['inputs']:
 				_text = "{0}[input]{1}{2} ".format(B_BLUE, RESET, GREEN)
+				_form += "[input] "
 				_name = input['name']
 				_type = input['type']
 				_value = input['value']
@@ -66,20 +73,27 @@ class Spider(object):
 				_text += "{1}name{2}={3}'{0}'{2}, ".format(_name, YELLOW, RESET,
 				 										   GREEN) if _name \
 														   is not "" else ""
+				_form += "name='{}', ".format(_name) if _name is not "" else ""
 				_text += "{1}type{2}={3}'{0}'{2}, ".format(_type, YELLOW, RESET,
 				 										   GREEN) if _type \
 														   is not "" else ""
+				_form += "type='{}', ".format(_type) if _type is not "" else ""
 				_text += "{1}value{2}={3}'{0}{2}', ".format(_value, YELLOW,
 															RESET, GREEN) \
 															if _value is not "" \
 															else ""
+				_form += "value='{}', ".format(_value) if _value is not "" else ""
 				_text += "{1}placeholder{2}={3}'{0}'{2}".format(_placeholder,
 																YELLOW, RESET,
 																GREEN) \
 																if _placeholder \
 																is not "" else ""
+				_form += "placeholder='{}', ".format(_placeholder) if _placeholder \
+													 is not "" else ""
+				_form += "\n"
 				print(_text+RESET)
 			self.printed_action.append(i['form_action'])
+			self.output_forms.append(_form)
 			print("-"*30+"</FORM>"+"-"*30)
 
 	def clean_link(self, link):
@@ -139,6 +153,7 @@ class Spider(object):
 				self.loop()
 		else:
 			print(stat)
+		return self.visited_urls, self.output_forms
 
 if __name__ == '__main__':
 	pass
