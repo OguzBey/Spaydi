@@ -8,11 +8,13 @@ Spaydi bir Web-Spider/Crawler aracıdır.
 - Derinlik seviyesine göre Toplama 1...5
 - Cookie desteği
 - Link ve Form çıktısı ./outputs
+- Hızlı tarama desteği
 
 ## Yapılacaklar
 - [x] Dosyaya çıktı alma
-- [ ] Threading
+- [x] Threading
 - [ ] Url parametrelerinin tespiti
+- [ ] Güvenlik denetimleri (XSS, SQLi, CLRF...)
 - [ ] ...
 
 

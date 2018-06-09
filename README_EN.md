@@ -8,11 +8,13 @@ Spaydi is Web-Spider Tool.
 - Gather by Depth Level 1...5
 - Support Cookie
 - Link, Forms outputs --> ./outputs
+- Support fast scan
 
 ## To Do
 - [x] Output to file
-- [ ] Threading
+- [x] Threading
 - [ ] Url parameters detection
+- [ ] Security audits (XSS, SQLi, CLRF...)
 - [ ] ...
 
 
