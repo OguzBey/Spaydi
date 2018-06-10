@@ -2,6 +2,9 @@ from . import browser
 from . import crawler
 import re
 from colorama import Fore, Style
+import queue
+from threading import Thread
+
 
 B_BLUE = Style.BRIGHT+Fore.BLUE
 B_WHITE = Style.BRIGHT+Fore.WHITE
@@ -13,8 +16,9 @@ YELLOW = Fore.YELLOW
 
 
 class Spider(object):
-	def __init__(self, url, level=None, cookie=None):
+	def __init__(self, url, level=None, cookie=None, fast=None):
 		self.level = level if level is not None and level in [1,2,3,4,5] else 3
+		self.fast_mode = fast if fast is not None else False
 		self.cookie = cookie
 		self.target_url = url
 		self.visited_urls = []
@@ -64,8 +68,8 @@ class Spider(object):
 			_form += "ACTION: {}\n".format(i['form_action'].lower())
 			_form += "METHOD: {}\n".format(i['form_method'].upper())
 			for input in i['inputs']:
-				_text = "{0}[input]{1}{2} ".format(B_BLUE, RESET, GREEN)
 				_form += "[input] "
+				_text = "{0}[input]{1}{2} ".format(B_BLUE, RESET, GREEN)
 				_name = input['name']
 				_type = input['type']
 				_value = input['value']
@@ -136,6 +140,43 @@ class Spider(object):
 		self.visit_urls = _url_list[:]
 		del _url_list
 
+	def t_process(self, link):
+		_url_list = []
+		stat = self.browser.get(url=link, cookie=self.cookie)
+		print("{1}{0}{2}".format("--"*40, B_RED, RESET))
+		print("{1}[GET]{2} {0}".format(link, B_CYAN, RESET))
+		self.visited_urls.append(self.just_url(link))
+		if stat in [200, 302, 301]:
+			forms = self.crawler.get_forms(self.browser.page_source, link)
+			self.print_forms(forms)
+			links = self.crawler.get_urls(self.browser.page_source)
+			for i in links:
+				_link = self.set_link(i)
+				if _link and self.just_url(_link) not in self.visited_urls:
+					_url_list.append(_link)
+		return _url_list
+
+	def t_loop(self):
+		_url_list = []
+		que = queue.Queue()
+		thread_list = []
+		for link in self.visit_urls:
+			link = self.clean_link(link)
+			if self.just_url(link) in self.visited_urls:
+				continue
+			t = Thread(target=lambda q, arg1: q.put(self.t_process(arg1)), \
+					   args=(que, link))
+			t.start()
+			thread_list.append(t)
+		for t in thread_list:
+			t.join()
+		while not que.empty():
+			_url_list.extend(que.get())
+		del self.visit_urls[:]
+		_url_list = list(set(_url_list))
+		self.visit_urls = _url_list[:]
+		del _url_list
+
 	def go(self):
 		# level 1
 		stat = self.browser.get(self.target_url, cookie=self.cookie)
@@ -149,8 +190,12 @@ class Spider(object):
 				if _link:
 					self.visit_urls.append(_link)
 			self.visit_urls = list(set(self.visit_urls))
-			for i in range(self.level-1):
-				self.loop()
+			if self.fast_mode:
+				for i in range(self.level-1):
+					self.t_loop()
+			else:
+				for i in range(self.level-1):
+					self.loop()
 		else:
 			print(stat)
 		return self.visited_urls, self.output_forms

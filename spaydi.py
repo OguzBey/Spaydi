@@ -1,5 +1,5 @@
 __author__ = "OguzBey"
-__version__ = "1.1.0"
+__version__ = "1.2.0"
 __email__ = "info@oguzbeg.com"
 
 from modules import spider
@@ -60,6 +60,15 @@ class Main(object):
 				fl.write(_write)
 
 	def start(self):
+		_fast = False
+		if "--fast" not in self.args and len(self.args) in [3,5,7]:
+			help()
+		elif "--fast" in self.args and len(self.args) in [3,5,7]:
+			_fast = True
+			self.args.remove('--fast')
+		else:
+			help()
+
 		_args = self.get_args(self.args)
 		if not self.check_args(_args):
 			help()
@@ -115,6 +124,7 @@ def help():
 			{0}--url{1} {2}<target_url>{1}
 			{0}--level{1} {2}[1-5]{1} --> default 3 (Depth)
 			{0}--cookie{1} {2}<cookie>{1} --> "key=value; key=value;"
+			{0}--fast{1} --> Fast Scan ! ( Dynamic Threading )
 
 	        {3}Example:{1}
 			{2}python3 spaydi.py --url {4}https://h4cktimes.com{1} --level {4}2{1}
@@ -125,7 +135,7 @@ def help():
 def main():
 	del sys.argv[0]
 	argc = len(sys.argv)
-	if argc in [2, 4, 6]:
+	if argc in [2, 3, 4, 5, 6, 7]:
 		Main(sys.argv).start()
 	else:
 		help()
