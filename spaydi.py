@@ -16,7 +16,7 @@ GREEN = spider.GREEN
 
 class Main(object):
 	def __init__(self, args):
-		self.my_args = ["--url", "--cookie", "--level"]
+		self.my_args = ["--url", "--cookie", "--level", "--fast"]
 		self.args = args
 		self.current_path = os.path.dirname(os.path.realpath(__file__))
 		self.links_file = "links.txt"
@@ -66,8 +66,6 @@ class Main(object):
 		elif "--fast" in self.args and len(self.args) in [3,5,7]:
 			_fast = True
 			self.args.remove('--fast')
-		else:
-			help()
 
 		_args = self.get_args(self.args)
 		if not self.check_args(_args):
@@ -78,7 +76,7 @@ class Main(object):
 		_level = _args['--level'] if '--level' in _args else None
 		_cookie = _args['--cookie'] if '--cookie' in _args else None
 		logo()
-		self.spaydi = spider.Spider(url=_url, level=_level, cookie=_cookie)
+		self.spaydi = spider.Spider(url=_url, level=_level, cookie=_cookie, fast=_fast)
 		try:
 			urls, forms = self.spaydi.go()
 			self.write_file(urls, self.links_file_path)
