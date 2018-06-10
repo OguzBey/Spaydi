@@ -44,11 +44,17 @@ class Browser(object):
 	def get(self, url:str, cookie=None) -> int:
 		try:
 			_req = urllib.request.Request(url=url, headers=self._header(cookie))
-			_resp = urllib.request.urlopen(_req, context=self.gcontext)
+			_resp = urllib.request.urlopen(_req)
 			self._set_info(_resp)
 			return _resp.status
 		except HTTPError as e:
 			return e.code
+		except:
+			_req = urllib.request.Request(url=url, headers=self._header(cookie))
+			_resp = urllib.request.urlopen(_req, context=self.gcontext)
+			self._set_info(_resp)
+			return _resp.status
+
 
 	def post(self, url:str, data:dict) -> int:
 		try:

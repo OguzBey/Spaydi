@@ -144,7 +144,7 @@ class Spider(object):
 		_url_list = []
 		stat = self.browser.get(url=link, cookie=self.cookie)
 		print("{1}{0}{2}".format("--"*40, B_RED, RESET))
-		print("{1}[GET]{2} {0}".format(link, B_CYAN, RESET))
+		print("{1}[GET]{2} {0} {3}".format(link, B_CYAN, RESET, stat))
 		self.visited_urls.append(self.just_url(link))
 		if stat in [200, 302, 301]:
 			forms = self.crawler.get_forms(self.browser.page_source, link)
