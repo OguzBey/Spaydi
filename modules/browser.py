@@ -4,11 +4,20 @@ from urllib.parse import urlencode, quote
 from random import choice, randint
 import os
 import ssl
+import logging
+import sys
 
 
 class Browser(object):
 
 	def __init__(self):
+		self.logger = logging.getLogger("Browser")
+		self.logger.setLevel(logging.DEBUG)
+		handler = logging.FileHandler("Spaydi.log")
+		handler.setLevel(logging.DEBUG)
+		formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+		handler.setFormatter(formatter)
+		self.logger.addHandler(handler)
 		self.page_source = None
 		self.page_title = None
 		self.current_url = None
@@ -32,24 +41,32 @@ class Browser(object):
 		return header
 
 	def _set_info(self, resp):
+		self.logger.info("_set_info() started.")
 		self.page_source = str(resp.read(), 'utf-8', errors='ignore')
 		self.current_url = resp.url
 		try:
 			self.page_title = self.page_source.split('<title>')[1].split('</title>')[0]
 		except:
+			_, err, _ = sys.exc_info()
+			self.logger.error("_set_info() --> {}".format(err))
 			self.page_title = None
 		_cookie = resp.getheader('set-cookie')
 		self.set_cookie = _cookie if _cookie is not None else "No-Cookie"
 
 	def get(self, url:str, cookie=None) -> int:
+		self.logger.info("get() started.")
 		try:
 			_req = urllib.request.Request(url=url, headers=self._header(cookie))
 			_resp = urllib.request.urlopen(_req)
 			self._set_info(_resp)
 			return _resp.status
 		except HTTPError as e:
+			_, err, _ = sys.exc_info()
+			self.logger.error("get() --> {}".format(err))
 			return e.code
 		except:
+			_, err, _ = sys.exc_info()
+			self.logger.error("get() --> {}".format(err))
 			_req = urllib.request.Request(url=url, headers=self._header(cookie))
 			_resp = urllib.request.urlopen(_req, context=self.gcontext)
 			self._set_info(_resp)
@@ -57,13 +74,15 @@ class Browser(object):
 
 
 	def post(self, url:str, data:dict) -> int:
+		self.logger.info("post() started.")
 		try:
 			data = urlencode(data)
-			# url = quote(url, safe=':')
 			_req = urllib.request.Request(url=url, data=data,
 										  headers=self._header())
 			_resp = urllib.request.urlopen(_req, context=self.gcontext)
 			self_set_info(_resp)
 			return _resp.status
 		except HTTPError as e:
+			_, err, _ = sys.exc_info()
+			self.logger.error("_set_info() --> {}".format(err))
 			return e.code

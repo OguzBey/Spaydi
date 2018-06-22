@@ -1,16 +1,25 @@
 import re
+import logging
+
 
 class Crawler(object):
 
 	def __init__(self):
-		pass
+		self.logger = logging.getLogger("Crawler")
+		self.logger.setLevel(logging.DEBUG)
+		handler = logging.FileHandler("Spaydi.log")
+		handler.setLevel(logging.DEBUG)
+		formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+		handler.setFormatter(formatter)
+		self.logger.addHandler(handler)
 
 	def get_urls(self, source):
-		# <a href="link"
+		self.logger.info("get_urls() started.")
 		f = re.findall(r'<a href=[\'"]?([^\'">]+)', source)
 		return f
 
 	def get_forms(self, source, url):
+		self.logger.info("get_urls() started.")
 		source = source.replace("\n","")
 		f = re.findall(r'<form.*?</form>', source)
 		forms = []

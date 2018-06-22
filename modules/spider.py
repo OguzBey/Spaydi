@@ -4,6 +4,7 @@ import re
 from colorama import Fore, Style
 import queue
 from threading import Thread
+import logging
 
 
 B_BLUE = Style.BRIGHT+Fore.BLUE
@@ -17,6 +18,13 @@ YELLOW = Fore.YELLOW
 
 class Spider(object):
 	def __init__(self, url, level=None, cookie=None, fast=None):
+		self.logger = logging.getLogger("Spider")
+		self.logger.setLevel(logging.DEBUG)
+		handler = logging.FileHandler("Spaydi.log")
+		handler.setLevel(logging.DEBUG)
+		formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+		handler.setFormatter(formatter)
+		self.logger.addHandler(handler)
 		self.level = level if level is not None and level in [1,2,3,4,5] else 3
 		self.fast_mode = fast if fast is not None else False
 		self.cookie = cookie
@@ -30,23 +38,31 @@ class Spider(object):
 		self.crawler = crawler.Crawler()
 
 	def get_domain(self, url):
+		self.logger.info("get_domain() started.")
 		_domain = re.findall(r'https?://(.*?)\/', url)
 		_domain2 = re.findall(r'https?://(.*?)$', url)
-		return _domain[0] if _domain else _domain2[0]
+		r_domain =  _domain[0] if _domain else _domain2[0]
+		self.logger.debug("get_domain() return --> {}".format(r_domain))
+		return r_domain
 
 	def set_link(self, link):
+		self.logger.info("set_link() started.")
 		if "javascript:" in link:
 			return False
 		if link.startswith("http") or link.startswith("https"):
 			_domain = self.get_domain(link)
 			if _domain == self.target_domain:
+				self.logger.debug("set_link() return --> {}".format(link))
 				return link
 			else:
 				return False
 		else:
-			return "http://{}/{}".format(self.target_domain, link)
+			link = "http://{}/{}".format(self.target_domain, link)
+			self.logger.debug("set_link() return --> {}".format(link))
+			return link
 
 	def print_forms(self, forms):
+		self.logger.info("print_forms() started.")
 		_form = ""
 		print("{1}Page Title:{2} {3}{0}{2}".format(self.browser.page_title,
 												   B_BLUE, RESET, GREEN))
@@ -101,6 +117,7 @@ class Spider(object):
 			print("-"*30+"</FORM>"+"-"*30)
 
 	def clean_link(self, link):
+		self.logger.info("clean_link() started.")
 		point = False
 		_link = ""
 		if "#" in link:
@@ -109,15 +126,23 @@ class Spider(object):
 					point = True
 					continue
 				_link += i
+			self.logger.debug("clean_link() return --> {}".format(_link))
 			return _link
+		self.logger.debug("clean_link() return --> {}".format(link))
 		return link
 
 	def just_url(self, link):
+		self.logger.info("just_url() started.")
 		if link.startswith("https://"):
-			return link[8::]
-		return link[7::]
+			link = link[8::]
+			self.logger.debug("just_url() return --> {}".format(link))
+			return link
+		link = link[7::]
+		self.logger.debug("just_url() return --> {}".format(link))
+		return link
 
 	def loop(self):
+		self.logger.info("loop() started.")
 		_url_list = []
 		for link in self.visit_urls:
 			link = self.clean_link(link)
@@ -141,6 +166,7 @@ class Spider(object):
 		del _url_list
 
 	def t_process(self, link):
+		self.logger.info("t_process() started.")
 		_url_list = []
 		stat = self.browser.get(url=link, cookie=self.cookie)
 		print("{1}{0}{2}".format("--"*40, B_RED, RESET))
@@ -157,6 +183,7 @@ class Spider(object):
 		return _url_list
 
 	def t_loop(self):
+		self.logger.info("t_loop() started.")
 		_url_list = []
 		que = queue.Queue()
 		thread_list = []
@@ -171,12 +198,12 @@ class Spider(object):
 			t.start()
 			thread_list.append(t)
 			th_count += 1
-			print("[+] Started Thread-{}".format(th_count))
+			self.logger.info("Started Thread-{}".format(th_count))
 			if th_count%max_thrad == 0:
-				print("[*] Waiting for Thread Process...")
+				self.logger.info("Waiting for Thread Process...")
 				for t in thread_list:
 					t.join()
-				print("[*] Thread Process Finished..")
+				self.logger.info("Thread Process Finished..")
 		while not que.empty():
 			_url_list.extend(que.get())
 		del self.visit_urls[:]
@@ -185,6 +212,7 @@ class Spider(object):
 		del _url_list
 
 	def go(self):
+		self.logger.info("go() started.")
 		# level 1
 		stat = self.browser.get(self.target_url, cookie=self.cookie)
 		print("{1}{0}{2}".format("--"*40, B_RED, RESET))

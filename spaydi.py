@@ -1,10 +1,12 @@
 __author__ = "OguzBey"
-__version__ = "1.2.3"
+__version__ = "1.3.3"
 __email__ = "info@oguzbeg.com"
 
 from modules import spider
 import sys
 import os
+import logging
+
 
 B_RED = spider.B_RED
 B_WHITE = spider.B_WHITE
@@ -13,9 +15,21 @@ RESET = spider.RESET
 YELLOW = spider.YELLOW
 GREEN = spider.GREEN
 
+logger = logging.getLogger("spaydi")
+logger.setLevel(logging.DEBUG)
+handler = logging.FileHandler("Spaydi.log")
+handler.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+logger.info("Started the program.")
+
 
 class Main(object):
 	def __init__(self, args):
+		self.logger = logging.getLogger("Spaydi-Main")
+		self.logger.setLevel(logging.DEBUG)
+		self.logger.addHandler(handler)
 		self.my_args = ["--url", "--cookie", "--level", "--fast"]
 		self.args = args
 		self.current_path = os.path.dirname(os.path.realpath(__file__))
@@ -28,20 +42,27 @@ class Main(object):
 											, self.forms_file)
 		if not os.path.exists(os.path.join(self.current_path, self.outputs_dir)):
 			os.mkdir(os.path.join(self.current_path, self.outputs_dir))
+			self.logger.info("Created outputs(DIR)")
 
 	def get_args(self, args):
+		self.logger.info("get_args() started.")
 		_args = dict()
 		for i in range(0, len(args), 2):
 			_args.update({args[i]:args[i+1]})
+		self.logger.debug("get_args() return --> {}".format(_args))
 		return _args
 
 	def check_args(self, args):
+		self.logger.info("check_args() started.")
 		for i in args:
 			if i not in self.my_args:
+				self.logger.debug("check_args() return --> {}".format("False"))
 				return False
+		self.logger.debug("check_args() return --> {}".format("True"))
 		return True
 
 	def write_file(self, listt, path, tire=False):
+		self.logger.info("write_file() started.")
 		if tire is False:
 			with open(path, "w") as fl:
 				_write = ""
@@ -60,6 +81,7 @@ class Main(object):
 				fl.write(_write)
 
 	def start(self):
+		self.logger.info("start() started.")
 		_fast = False
 		if "--fast" not in self.args and len(self.args) in [3,5,7]:
 			help()
@@ -83,18 +105,25 @@ class Main(object):
 			self.write_file(forms, self.forms_file_path, tire=True)
 			print("[+]  {} : {}".format("Links", self.links_file_path))
 			print("[+]  {} : {}".format("Forms", self.forms_file_path))
+			print("[+]  {}:  {}".format("Logs:", os.path.join(self.current_path, "Spaydi.log")))
 			print("[-] Done.")
+			self.logger.info("Exit.")
 		except KeyboardInterrupt:
 			if self.spaydi.output_forms and self.spaydi.visited_urls:
 				self.write_file(self.spaydi.visited_urls, self.links_file_path)
 				self.write_file(self.spaydi.output_forms, self.forms_file_path, tire=True)
 				print("[+]  {} : {}".format("Links", self.links_file_path))
 				print("[+]  {} : {}".format("Forms", self.forms_file_path))
+				print("[+]  {}:  {}".format("Logs:", os.path.join(self.current_path, "Spaydi.log")))
 			print("Bye")
+			self.logger.info("Exit.")
 		except Exception as e:
-			print(e)
+			_, err, _ = sys.exc_info()
+			self.logger.error("start() --> {}".format(err))
+			self.logger.info("Exit.")
 
 def logo():
+	logger.info("logo() started.")
 	_1 = """
 
 {3}		  ██████  ██▓███   ▄▄▄     ▓██   ██▓▓█████▄  ██▓
@@ -117,20 +146,23 @@ def logo():
 
 
 def help():
+	logger.info("help() started.")
 	logo()
 	_text = """
 			{0}--url{1} {2}<target_url>{1}
 			{0}--level{1} {2}[1-5]{1} --> default 3 (Depth)
 			{0}--cookie{1} {2}<cookie>{1} --> "key=value; key=value;"
-			{0}--fast{1} --> Fast Scan ! ( 5 Thread ! )
+			{0}--fast{1} --> Fast Scan ! (5 Threads)
 
 	        {3}Example:{1}
 			{2}python3 spaydi.py --url {4}https://h4cktimes.com{1} --level {4}2{1}
 	""".format(B_WHITE, RESET, GREEN, YELLOW, B_BLUE)
 	print(_text)
+	logger.info("Exit.")
 	sys.exit(1)
 
 def main():
+	logger.info("main() started.")
 	del sys.argv[0]
 	argc = len(sys.argv)
 	if argc in [2, 3, 4, 5, 6, 7]:
