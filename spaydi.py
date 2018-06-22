@@ -1,5 +1,5 @@
 __author__ = "OguzBey"
-__version__ = "1.2.2"
+__version__ = "1.2.3"
 __email__ = "info@oguzbeg.com"
 
 from modules import spider
@@ -122,7 +122,7 @@ def help():
 			{0}--url{1} {2}<target_url>{1}
 			{0}--level{1} {2}[1-5]{1} --> default 3 (Depth)
 			{0}--cookie{1} {2}<cookie>{1} --> "key=value; key=value;"
-			{0}--fast{1} --> Fast Scan ! ( Dynamic Threading )
+			{0}--fast{1} --> Fast Scan ! ( 5 Thread ! )
 
 	        {3}Example:{1}
 			{2}python3 spaydi.py --url {4}https://h4cktimes.com{1} --level {4}2{1}

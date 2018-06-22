@@ -160,6 +160,8 @@ class Spider(object):
 		_url_list = []
 		que = queue.Queue()
 		thread_list = []
+		th_count = 0
+		max_thrad = 5
 		for link in self.visit_urls:
 			link = self.clean_link(link)
 			if self.just_url(link) in self.visited_urls:
@@ -168,8 +170,13 @@ class Spider(object):
 					   args=(que, link))
 			t.start()
 			thread_list.append(t)
-		for t in thread_list:
-			t.join()
+			th_count += 1
+			print("[+] Started Thread-{}".format(th_count))
+			if th_count%max_thrad == 0:
+				print("[*] Waiting for Thread Process...")
+				for t in thread_list:
+					t.join()
+				print("[*] Thread Process Finished..")
 		while not que.empty():
 			_url_list.extend(que.get())
 		del self.visit_urls[:]
