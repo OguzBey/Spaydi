@@ -38,31 +38,31 @@ class Spider(object):
 		self.crawler = crawler.Crawler()
 
 	def get_domain(self, url):
-		self.logger.info("get_domain() started.")
+		# self.logger.info("get_domain() started.")
 		_domain = re.findall(r'https?://(.*?)\/', url)
 		_domain2 = re.findall(r'https?://(.*?)$', url)
 		r_domain =  _domain[0] if _domain else _domain2[0]
-		self.logger.debug("get_domain() return --> {}".format(r_domain))
+		# self.logger.debug("get_domain() return --> {}".format(r_domain))
 		return r_domain
 
 	def set_link(self, link):
-		self.logger.info("set_link() started.")
+		# self.logger.info("set_link() started.")
 		if "javascript:" in link:
 			return False
 		if link.startswith("http") or link.startswith("https"):
 			_domain = self.get_domain(link)
 			if _domain == self.target_domain:
-				self.logger.debug("set_link() return --> {}".format(link))
+				# self.logger.debug("set_link() return --> {}".format(link))
 				return link
 			else:
 				return False
 		else:
 			link = "http://{}/{}".format(self.target_domain, link)
-			self.logger.debug("set_link() return --> {}".format(link))
+			# self.logger.debug("set_link() return --> {}".format(link))
 			return link
 
 	def print_forms(self, forms):
-		self.logger.info("print_forms() started.")
+		# self.logger.info("print_forms() started.")
 		_form = ""
 		print("{1}Page Title:{2} {3}{0}{2}".format(self.browser.page_title,
 												   B_BLUE, RESET, GREEN))
@@ -117,7 +117,7 @@ class Spider(object):
 			print("-"*30+"</FORM>"+"-"*30)
 
 	def clean_link(self, link):
-		self.logger.info("clean_link() started.")
+		# self.logger.info("clean_link() started.")
 		point = False
 		_link = ""
 		if "#" in link:
@@ -126,23 +126,23 @@ class Spider(object):
 					point = True
 					continue
 				_link += i
-			self.logger.debug("clean_link() return --> {}".format(_link))
+			# self.logger.debug("clean_link() return --> {}".format(_link))
 			return _link
-		self.logger.debug("clean_link() return --> {}".format(link))
+		# self.logger.debug("clean_link() return --> {}".format(link))
 		return link
 
 	def just_url(self, link):
-		self.logger.info("just_url() started.")
+		# self.logger.info("just_url() started.")
 		if link.startswith("https://"):
 			link = link[8::]
-			self.logger.debug("just_url() return --> {}".format(link))
+			# self.logger.debug("just_url() return --> {}".format(link))
 			return link
 		link = link[7::]
-		self.logger.debug("just_url() return --> {}".format(link))
+		# self.logger.debug("just_url() return --> {}".format(link))
 		return link
 
 	def loop(self):
-		self.logger.info("loop() started.")
+		# self.logger.info("loop() started.")
 		_url_list = []
 		for link in self.visit_urls:
 			link = self.clean_link(link)
@@ -166,7 +166,7 @@ class Spider(object):
 		del _url_list
 
 	def t_process(self, link):
-		self.logger.info("t_process() started.")
+		# self.logger.info("t_process() started.")
 		_url_list = []
 		stat = self.browser.get(url=link, cookie=self.cookie)
 		print("{1}{0}{2}".format("--"*40, B_RED, RESET))
@@ -183,7 +183,7 @@ class Spider(object):
 		return _url_list
 
 	def t_loop(self):
-		self.logger.info("t_loop() started.")
+		# self.logger.info("t_loop() started.")
 		_url_list = []
 		que = queue.Queue()
 		thread_list = []
@@ -225,11 +225,14 @@ class Spider(object):
 				if _link:
 					self.visit_urls.append(_link)
 			self.visit_urls = list(set(self.visit_urls))
+			self.logger.info("t_loop() started with Fast mode")
 			if self.fast_mode:
 				for i in range(self.level-1):
+					self.logger.info("t_loop() started with Fast mode")
 					self.t_loop()
 			else:
 				for i in range(self.level-1):
+					self.logger.info("t_loop() started with Normal mode")
 					self.loop()
 		else:
 			print(stat)

@@ -41,7 +41,7 @@ class Browser(object):
 		return header
 
 	def _set_info(self, resp):
-		self.logger.info("_set_info() started.")
+		# self.logger.info("_set_info() started.")
 		self.page_source = str(resp.read(), 'utf-8', errors='ignore')
 		self.current_url = resp.url
 		try:
@@ -54,11 +54,11 @@ class Browser(object):
 		self.set_cookie = _cookie if _cookie is not None else "No-Cookie"
 
 	def get(self, url:str, cookie=None) -> int:
-		self.logger.info("get() started.")
 		try:
 			_req = urllib.request.Request(url=url, headers=self._header(cookie))
 			_resp = urllib.request.urlopen(_req)
 			self._set_info(_resp)
+			self.logger.info("get() [GET] --> {} {}".format(url, _resp.status))
 			return _resp.status
 		except HTTPError as e:
 			_, err, _ = sys.exc_info()
@@ -74,15 +74,15 @@ class Browser(object):
 
 
 	def post(self, url:str, data:dict) -> int:
-		self.logger.info("post() started.")
 		try:
 			data = urlencode(data)
 			_req = urllib.request.Request(url=url, data=data,
 										  headers=self._header())
 			_resp = urllib.request.urlopen(_req, context=self.gcontext)
 			self_set_info(_resp)
+			self.logger.info("post() [POST] --> {} {}".format(url, _resp.status))
 			return _resp.status
 		except HTTPError as e:
 			_, err, _ = sys.exc_info()
-			self.logger.error("_set_info() --> {}".format(err))
+			self.logger.error("post() --> {}".format(err))
 			return e.code

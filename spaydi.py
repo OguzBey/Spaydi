@@ -1,5 +1,5 @@
 __author__ = "OguzBey"
-__version__ = "1.3.3"
+__version__ = "1.3.1"
 __email__ = "info@oguzbeg.com"
 
 from modules import spider
@@ -49,16 +49,16 @@ class Main(object):
 		_args = dict()
 		for i in range(0, len(args), 2):
 			_args.update({args[i]:args[i+1]})
-		self.logger.debug("get_args() return --> {}".format(_args))
+		# self.logger.debug("get_args() return --> {}".format(_args))
 		return _args
 
 	def check_args(self, args):
 		self.logger.info("check_args() started.")
 		for i in args:
 			if i not in self.my_args:
-				self.logger.debug("check_args() return --> {}".format("False"))
+				# self.logger.debug("check_args() return --> {}".format("False"))
 				return False
-		self.logger.debug("check_args() return --> {}".format("True"))
+		# self.logger.debug("check_args() return --> {}".format("True"))
 		return True
 
 	def write_file(self, listt, path, tire=False):
