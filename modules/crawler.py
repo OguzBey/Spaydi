@@ -5,13 +5,6 @@ import logging
 class Crawler(object):
 
 	def __init__(self):
-		# self.logger = logging.getLogger("Crawler")
-		# self.logger.setLevel(logging.DEBUG)
-		# handler = logging.FileHandler("Spaydi.log")
-		# handler.setLevel(logging.DEBUG)
-		# formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-		# handler.setFormatter(formatter)
-		# self.logger.addHandler(handler)
 		pass
 
 	def get_urls(self, source):
@@ -71,3 +64,19 @@ class Crawler(object):
 			attr.update({'inputs':c_inputs})
 			forms.append(attr)
 		return forms
+
+	def get_uparameters(self, url):
+		# http:www.site.com/index.php?id=12&ex=10&ex2=123
+		_url = url.split("?")
+		_url2 = _url[-1]
+		if re.findall("(\w+=\w*)", _url2):
+			params_v = re.findall("(\w+=\w*[\/?.*]?[a-zA-Z0-9\.\-]*)", _url2)
+			return params_v if len(params_v) != 0 else False
+		return False
+
+if __name__ == '__main__':
+	pass
+	# cr = Crawler()
+	# with open("../outputs/links.txt", "r") as fl:
+	# 	for i in fl:
+	# 		print(cr.get_uparameters(i))

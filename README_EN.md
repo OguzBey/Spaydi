@@ -13,7 +13,7 @@ Spaydi is Web-Spider Tool.
 ## To Do
 - [x] Output to file
 - [x] Threading
-- [ ] Url parameters detection
+- [x] Url parameters detection
 - [ ] Security audits (XSS, SQLi, CLRF...)
 - [ ] ...
 
@@ -25,7 +25,7 @@ Spaydi is Web-Spider Tool.
 
 ## Screenshots
 
-![Spaydi](https://raw.githubusercontent.com/OguzBey/Spaydi/master/screens/spaydi-1-1-1.png )
+![Spaydi](https://raw.githubusercontent.com/OguzBey/Spaydi/master/screens/spaydi-1-1-2.png )
 
 ![Spaydi](https://raw.githubusercontent.com/OguzBey/Spaydi/master/screens/spaydi-2.png )
 

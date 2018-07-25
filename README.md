@@ -13,7 +13,7 @@ Spaydi bir Web-Spider/Crawler aracıdır.
 ## Yapılacaklar
 - [x] Dosyaya çıktı alma
 - [x] Threading
-- [ ] Url parametrelerinin tespiti
+- [x] Url parametrelerinin tespiti
 - [ ] Güvenlik denetimleri (XSS, SQLi, CLRF...)
 - [ ] ...
 
@@ -25,7 +25,7 @@ Spaydi bir Web-Spider/Crawler aracıdır.
 
 ## Ekran Götüntüleri
 
-![Spaydi](https://raw.githubusercontent.com/OguzBey/Spaydi/master/screens/spaydi-1-1-1.png )
+![Spaydi](https://raw.githubusercontent.com/OguzBey/Spaydi/master/screens/spaydi-1-1-2.png )
 
 ![Spaydi](https://raw.githubusercontent.com/OguzBey/Spaydi/master/screens/spaydi-2.png )
 

@@ -1,8 +1,9 @@
 __author__ = "OguzBey"
-__version__ = "1.3.1"
+__version__ = "1.4.0"
 __email__ = "info@oguzbeg.com"
 
 from modules import spider
+from modules import crawler
 import sys
 import os
 import logging
@@ -27,6 +28,7 @@ logger.info("Started the program.")
 
 class Main(object):
 	def __init__(self, args):
+		self.crawler = crawler.Crawler()
 		self.logger = logging.getLogger("Spaydi-Main")
 		self.logger.setLevel(logging.DEBUG)
 		self.logger.addHandler(handler)
@@ -56,9 +58,7 @@ class Main(object):
 		self.logger.info("check_args() started.")
 		for i in args:
 			if i not in self.my_args:
-				# self.logger.debug("check_args() return --> {}".format("False"))
 				return False
-		# self.logger.debug("check_args() return --> {}".format("True"))
 		return True
 
 	def write_file(self, listt, path, tire=False):
@@ -103,6 +103,18 @@ class Main(object):
 			urls, forms = self.spaydi.go()
 			self.write_file(urls, self.links_file_path)
 			self.write_file(forms, self.forms_file_path, tire=True)
+			print(B_RED+"--"*30+RESET)
+			print("[+]{0} Detected url parameters :{1}".format(B_BLUE, RESET))
+			for url in urls:
+				_text = ""
+				uparameters = self.crawler.get_uparameters(url=url)
+				if uparameters:
+					print("{0}[URL] >> {1}{3}{2}{1}".format(B_BLUE, RESET, url, GREEN))
+					for i in uparameters:
+						_text += "{0}{2}{1}, ".format(YELLOW, RESET, i)
+					_text = _text[:-2]
+					print("{0}[P] >> {1}{2}".format(B_BLUE, RESET, _text))
+			print(B_RED+"--"*30+RESET)
 			print("[+]  {} : {}".format("Links", self.links_file_path))
 			print("[+]  {} : {}".format("Forms", self.forms_file_path))
 			print("[+]  {}:  {}".format("Logs:", os.path.join(self.current_path, "Spaydi.log")))
@@ -110,12 +122,24 @@ class Main(object):
 			self.logger.info("Exit.")
 		except KeyboardInterrupt:
 			if self.spaydi.output_forms and self.spaydi.visited_urls:
+				print(B_RED+"--"*30+RESET)
+				print("[+]{0} Detected url parameters :{1}".format(B_BLUE, RESET))
+				for url in self.spaydi.visited_urls:
+					_text = ""
+					uparameters = self.crawler.get_uparameters(url=url)
+					if uparameters:
+						print("{0}[URL] >> {1}{3}{2}{1}".format(B_BLUE, RESET, url, GREEN))
+						for i in uparameters:
+							_text += "{0}{2}{1}, ".format(YELLOW, RESET, i)
+						_text = _text[:-2]
+						print("{0}[P] >> {1}{2}".format(B_BLUE, RESET, _text))
+				print(B_RED+"--"*30+RESET)
 				self.write_file(self.spaydi.visited_urls, self.links_file_path)
 				self.write_file(self.spaydi.output_forms, self.forms_file_path, tire=True)
 				print("[+]  {} : {}".format("Links", self.links_file_path))
 				print("[+]  {} : {}".format("Forms", self.forms_file_path))
 				print("[+]  {}:  {}".format("Logs:", os.path.join(self.current_path, "Spaydi.log")))
-			print("Bye")
+			print("[-] Bye.")
 			self.logger.info("Exit.")
 		except Exception as e:
 			_, err, _ = sys.exc_info()

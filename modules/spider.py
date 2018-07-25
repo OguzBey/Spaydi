@@ -38,31 +38,25 @@ class Spider(object):
 		self.crawler = crawler.Crawler()
 
 	def get_domain(self, url):
-		# self.logger.info("get_domain() started.")
 		_domain = re.findall(r'https?://(.*?)\/', url)
 		_domain2 = re.findall(r'https?://(.*?)$', url)
 		r_domain =  _domain[0] if _domain else _domain2[0]
-		# self.logger.debug("get_domain() return --> {}".format(r_domain))
 		return r_domain
 
 	def set_link(self, link):
-		# self.logger.info("set_link() started.")
 		if "javascript:" in link:
 			return False
 		if link.startswith("http") or link.startswith("https"):
 			_domain = self.get_domain(link)
 			if _domain == self.target_domain:
-				# self.logger.debug("set_link() return --> {}".format(link))
 				return link
 			else:
 				return False
 		else:
 			link = "http://{}/{}".format(self.target_domain, link)
-			# self.logger.debug("set_link() return --> {}".format(link))
 			return link
 
 	def print_forms(self, forms):
-		# self.logger.info("print_forms() started.")
 		_form = ""
 		print("{1}Page Title:{2} {3}{0}{2}".format(self.browser.page_title,
 												   B_BLUE, RESET, GREEN))
@@ -117,7 +111,6 @@ class Spider(object):
 			print("-"*30+"</FORM>"+"-"*30)
 
 	def clean_link(self, link):
-		# self.logger.info("clean_link() started.")
 		point = False
 		_link = ""
 		if "#" in link:
@@ -126,19 +119,14 @@ class Spider(object):
 					point = True
 					continue
 				_link += i
-			# self.logger.debug("clean_link() return --> {}".format(_link))
 			return _link
-		# self.logger.debug("clean_link() return --> {}".format(link))
 		return link
 
 	def just_url(self, link):
-		# self.logger.info("just_url() started.")
 		if link.startswith("https://"):
 			link = link[8::]
-			# self.logger.debug("just_url() return --> {}".format(link))
 			return link
 		link = link[7::]
-		# self.logger.debug("just_url() return --> {}".format(link))
 		return link
 
 	def loop(self):
@@ -189,17 +177,25 @@ class Spider(object):
 		thread_list = []
 		th_count = 0
 		max_thrad = 5
+		l_visit_urls = len(self.visit_urls)
 		for link in self.visit_urls:
 			link = self.clean_link(link)
 			if self.just_url(link) in self.visited_urls:
+				l_visit_urls -= 1
 				continue
 			t = Thread(target=lambda q, arg1: q.put(self.t_process(arg1)), \
 					   args=(que, link))
 			t.start()
 			thread_list.append(t)
 			th_count += 1
+			l_visit_urls -= 1
 			self.logger.info("Started Thread-{}".format(th_count))
 			if th_count%max_thrad == 0:
+				self.logger.info("Waiting for Thread Process...")
+				for t in thread_list:
+					t.join()
+				self.logger.info("Thread Process Finished..")
+			elif l_visit_urls < 5:
 				self.logger.info("Waiting for Thread Process...")
 				for t in thread_list:
 					t.join()
