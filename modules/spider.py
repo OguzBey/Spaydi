@@ -17,6 +17,7 @@ YELLOW = Fore.YELLOW
 
 
 class Spider(object):
+
 	def __init__(self, url, level=None, cookie=None, fast=None):
 		self.logger = logging.getLogger("Spider")
 		self.logger.setLevel(logging.DEBUG)
@@ -29,6 +30,7 @@ class Spider(object):
 		self.fast_mode = fast if fast is not None else False
 		self.cookie = cookie
 		self.target_url = url
+		self.visited_urns = []
 		self.visited_urls = []
 		self.output_forms = []
 		self.visit_urls = []
@@ -122,7 +124,7 @@ class Spider(object):
 			return _link
 		return link
 
-	def just_url(self, link):
+	def just_urn(self, link):
 		if link.startswith("https://"):
 			link = link[8::]
 			return link
@@ -134,19 +136,20 @@ class Spider(object):
 		_url_list = []
 		for link in self.visit_urls:
 			link = self.clean_link(link)
-			if self.just_url(link) in self.visited_urls:
+			if self.just_urn(link) in self.visited_urns:
 				continue
 			stat = self.browser.get(url=link, cookie=self.cookie)
 			print("{1}{0}{2}".format("--"*40, B_RED, RESET))
 			print("{1}[GET]{2} {0}".format(link, B_CYAN, RESET))
-			self.visited_urls.append(self.just_url(link))
+			self.visited_urns.append(self.just_urn(link))
+			self.visited_urls.append(link)
 			if stat in [200, 302, 301]:
 				forms = self.crawler.get_forms(self.browser.page_source, link)
 				self.print_forms(forms)
 				links = self.crawler.get_urls(self.browser.page_source)
 				for i in links:
 					_link = self.set_link(i)
-					if _link and self.just_url(_link) not in self.visited_urls:
+					if _link and self.just_urn(_link) not in self.visited_urns:
 						_url_list.append(_link)
 		del self.visit_urls[:]
 		_url_list = list(set(_url_list))
@@ -159,14 +162,15 @@ class Spider(object):
 		stat = self.browser.get(url=link, cookie=self.cookie)
 		print("{1}{0}{2}".format("--"*40, B_RED, RESET))
 		print("{1}[GET]{2} {0} {3}".format(link, B_CYAN, RESET, stat))
-		self.visited_urls.append(self.just_url(link))
+		self.visited_urns.append(self.just_urn(link))
+		self.visited_urls.append(link)
 		if stat in [200, 302, 301]:
 			forms = self.crawler.get_forms(self.browser.page_source, link)
 			self.print_forms(forms)
 			links = self.crawler.get_urls(self.browser.page_source)
 			for i in links:
 				_link = self.set_link(i)
-				if _link and self.just_url(_link) not in self.visited_urls:
+				if _link and self.just_urn(_link) not in self.visited_urns:
 					_url_list.append(_link)
 		return _url_list
 
@@ -180,7 +184,7 @@ class Spider(object):
 		l_visit_urls = len(self.visit_urls)
 		for link in self.visit_urls:
 			link = self.clean_link(link)
-			if self.just_url(link) in self.visited_urls:
+			if self.just_urn(link) in self.visited_urns:
 				l_visit_urls -= 1
 				continue
 			t = Thread(target=lambda q, arg1: q.put(self.t_process(arg1)), \

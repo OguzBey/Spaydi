@@ -1,5 +1,5 @@
 __author__ = "OguzBey"
-__version__ = "1.4.0"
+__version__ = "1.4.1"
 __email__ = "info@oguzbeg.com"
 
 from modules import spider
@@ -179,7 +179,7 @@ def help():
 			{0}--fast{1} --> Fast Scan ! (5 Threads)
 
 	        {3}Example:{1}
-			{2}python3 spaydi.py --url {4}https://h4cktimes.com{1} --level {4}2{1}
+			{2}python3 spaydi.py{1} --url {4}https://h4cktimes.com{1} --level {4}2{1}
 	""".format(B_WHITE, RESET, GREEN, YELLOW, B_BLUE)
 	print(_text)
 	logger.info("Exit.")
