@@ -1,9 +1,10 @@
 __author__ = "OguzBey"
-__version__ = "1.4.1"
+__version__ = "1.4.2"
 __email__ = "info@oguzbeg.com"
 
 from modules import spider
 from modules import crawler
+# from modules import sqli
 import sys
 import os
 import logging
@@ -32,6 +33,7 @@ class Main(object):
 		self.logger = logging.getLogger("Spaydi-Main")
 		self.logger.setLevel(logging.DEBUG)
 		self.logger.addHandler(handler)
+		self.injectable = []
 		self.my_args = ["--url", "--cookie", "--level", "--fast"]
 		self.args = args
 		self.current_path = os.path.dirname(os.path.realpath(__file__))
@@ -83,12 +85,11 @@ class Main(object):
 	def start(self):
 		self.logger.info("start() started.")
 		_fast = False
-		if "--fast" not in self.args and len(self.args) in [3,5,7]:
+		if "--fast" not in self.args and len(self.args) in [3,5,7,9]:
 			help()
-		elif "--fast" in self.args and len(self.args) in [3,5,7]:
+		elif "--fast" in self.args and len(self.args) in [3,5,7,9]:
 			_fast = True
 			self.args.remove('--fast')
-
 		_args = self.get_args(self.args)
 		if not self.check_args(_args):
 			help()
@@ -101,50 +102,35 @@ class Main(object):
 		self.spaydi = spider.Spider(url=_url, level=_level, cookie=_cookie, fast=_fast)
 		try:
 			urls, forms = self.spaydi.go()
-			self.write_file(urls, self.links_file_path)
-			self.write_file(forms, self.forms_file_path, tire=True)
-			print(B_RED+"--"*30+RESET)
-			print("[+]{0} Detected url parameters :{1}".format(B_BLUE, RESET))
-			for url in urls:
-				_text = ""
-				uparameters = self.crawler.get_uparameters(url=url)
-				if uparameters:
-					print("{0}[URL] >> {1}{3}{2}{1}".format(B_BLUE, RESET, url, GREEN))
-					for i in uparameters:
-						_text += "{0}{2}{1}, ".format(YELLOW, RESET, i)
-					_text = _text[:-2]
-					print("{0}[P] >> {1}{2}".format(B_BLUE, RESET, _text))
-			print(B_RED+"--"*30+RESET)
-			print("[+]  {} : {}".format("Links", self.links_file_path))
-			print("[+]  {} : {}".format("Forms", self.forms_file_path))
-			print("[+]  {}:  {}".format("Logs:", os.path.join(self.current_path, "Spaydi.log")))
-			print("[-] Done.")
-			self.logger.info("Exit.")
+			self.exit_o = "[+] Done."
 		except KeyboardInterrupt:
-			if self.spaydi.output_forms and self.spaydi.visited_urls:
-				print(B_RED+"--"*30+RESET)
-				print("[+]{0} Detected url parameters :{1}".format(B_BLUE, RESET))
-				for url in self.spaydi.visited_urls:
-					_text = ""
-					uparameters = self.crawler.get_uparameters(url=url)
-					if uparameters:
-						print("{0}[URL] >> {1}{3}{2}{1}".format(B_BLUE, RESET, url, GREEN))
-						for i in uparameters:
-							_text += "{0}{2}{1}, ".format(YELLOW, RESET, i)
-						_text = _text[:-2]
-						print("{0}[P] >> {1}{2}".format(B_BLUE, RESET, _text))
-				print(B_RED+"--"*30+RESET)
-				self.write_file(self.spaydi.visited_urls, self.links_file_path)
-				self.write_file(self.spaydi.output_forms, self.forms_file_path, tire=True)
-				print("[+]  {} : {}".format("Links", self.links_file_path))
-				print("[+]  {} : {}".format("Forms", self.forms_file_path))
-				print("[+]  {}:  {}".format("Logs:", os.path.join(self.current_path, "Spaydi.log")))
-			print("[-] Bye.")
-			self.logger.info("Exit.")
+			urls = self.spaydi.visited_urls
+			forms = self.spaydi.output_forms
+			self.exit_o = "[-] Exit."
 		except Exception as e:
 			_, err, _ = sys.exc_info()
 			self.logger.error("start() --> {}".format(err))
 			self.logger.info("Exit.")
+		self.write_file(urls, self.links_file_path)
+		self.write_file(forms, self.forms_file_path, tire=True)
+		print(B_RED+"--"*30+RESET)
+		print("[+]{0} Detected url parameters :{1}".format(B_BLUE, RESET))
+		for url in urls:
+			_text = ""
+			uparameters = self.crawler.get_uparameters(url=url)
+			if uparameters:
+				self.injectable.append(url)
+				print("{0}[URL] >> {1}{3}{2}{1}".format(B_BLUE, RESET, url, GREEN))
+				for i in uparameters:
+					_text += "{0}{2}{1}, ".format(YELLOW, RESET, i)
+				_text = _text[:-2]
+				print("{0}[P] >> {1}{2}".format(B_BLUE, RESET, _text))
+		print(B_RED+"--"*30+RESET)
+		print("[+]  {} : {}".format("Links", self.links_file_path))
+		print("[+]  {} : {}".format("Forms", self.forms_file_path))
+		print("[+]  {}:  {}".format("Logs:", os.path.join(self.current_path, "Spaydi.log")))
+		print(self.exit_o)
+		self.logger.info("Exit.")
 
 def logo():
 	logger.info("logo() started.")
@@ -177,9 +163,11 @@ def help():
 			{0}--level{1} {2}[1-5]{1} --> default 3 (Depth)
 			{0}--cookie{1} {2}<cookie>{1} --> "key=value; key=value;"
 			{0}--fast{1} --> Fast Scan ! (5 Threads)
+			{0}--check{1} {2}[sqli]{1} --> check sqli vuln
 
-	        {3}Example:{1}
+	        {3}Examples:{1}
 			{2}python3 spaydi.py{1} --url {4}https://h4cktimes.com{1} --level {4}2{1}
+			{2}python3 spaydi.py{1} --url {4}http://python4hackers.com{1} --check {4}sqli{1}
 	""".format(B_WHITE, RESET, GREEN, YELLOW, B_BLUE)
 	print(_text)
 	logger.info("Exit.")
@@ -189,7 +177,7 @@ def main():
 	logger.info("main() started.")
 	del sys.argv[0]
 	argc = len(sys.argv)
-	if argc in [2, 3, 4, 5, 6, 7]:
+	if argc in [2, 3, 4, 5, 6, 7, 9]:
 		Main(sys.argv).start()
 	else:
 		help()
