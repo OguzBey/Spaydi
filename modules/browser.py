@@ -62,7 +62,7 @@ class Browser(object):
 			return _resp.status
 		except HTTPError as e:
 			_, err, _ = sys.exc_info()
-			self.logger.error("get() --> {}".format(err))
+			self.logger.error("get() --> {} {}".format(err, url))
 			return e.code
 		except:
 			_, err, _ = sys.exc_info()

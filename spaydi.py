@@ -1,10 +1,10 @@
 __author__ = "OguzBey"
-__version__ = "1.4.2"
+__version__ = "1.5.0"
 __email__ = "info@oguzbeg.com"
 
 from modules import spider
 from modules import crawler
-# from modules import sqli
+from modules import sqli
 import sys
 import os
 import logging
@@ -30,11 +30,13 @@ logger.info("Started the program.")
 class Main(object):
 	def __init__(self, args):
 		self.crawler = crawler.Crawler()
+		self.sqli = sqli.SqlInjection()
 		self.logger = logging.getLogger("Spaydi-Main")
 		self.logger.setLevel(logging.DEBUG)
 		self.logger.addHandler(handler)
 		self.injectable = []
-		self.my_args = ["--url", "--cookie", "--level", "--fast"]
+		self.my_args = ["--url", "--cookie", "--level", "--fast", "--check"]
+		self.check_list = ["sqli"]
 		self.args = args
 		self.current_path = os.path.dirname(os.path.realpath(__file__))
 		self.links_file = "links.txt"
@@ -95,6 +97,12 @@ class Main(object):
 			help()
 		if not '--url' in _args:
 			help()
+		_check = _args['--check'] if '--check' in _args else None
+		if _check: # sqli, XSS, ...
+			_check = _check.split(",")
+			for i in _check:
+				if i not in self.check_list:
+					help()
 		_url = _args['--url']
 		_level = _args['--level'] if '--level' in _args else None
 		_cookie = _args['--cookie'] if '--cookie' in _args else None
@@ -119,13 +127,25 @@ class Main(object):
 			_text = ""
 			uparameters = self.crawler.get_uparameters(url=url)
 			if uparameters:
-				self.injectable.append(url)
+				for param in uparameters:
+					_url = {}
+					_url.update({'url':url, 'param':param})
+					self.injectable.append(_url)
 				print("{0}[URL] >> {1}{3}{2}{1}".format(B_BLUE, RESET, url, GREEN))
 				for i in uparameters:
 					_text += "{0}{2}{1}, ".format(YELLOW, RESET, i)
 				_text = _text[:-2]
 				print("{0}[P] >> {1}{2}".format(B_BLUE, RESET, _text))
 		print(B_RED+"--"*30+RESET)
+		### CHECK VULN ####
+		if "sqli" in _check:
+			### SQLi ####
+			_check.remove('sqli')
+			print("{2}[+]{1} {0}Starting Sqli...{1}".format(B_BLUE, RESET, B_WHITE))
+			self.sqli.start(urls=self.injectable)
+			print(B_RED+"--"*30+RESET) # END
+			##############
+		###################
 		print("[+]  {} : {}".format("Links", self.links_file_path))
 		print("[+]  {} : {}".format("Forms", self.forms_file_path))
 		print("[+]  {}:  {}".format("Logs:", os.path.join(self.current_path, "Spaydi.log")))
