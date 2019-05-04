@@ -48,7 +48,7 @@ class Spider(object):
     def set_link(self, link):
         if "javascript:" in link:
             return False
-        if link.startswith("http") or link.startswith("https"):
+        if link.startswith("http://") or link.startswith("https://"):
             _domain = self.get_domain(link)
             if _domain == self.target_domain:
                 return link
