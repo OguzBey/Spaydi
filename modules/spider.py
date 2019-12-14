@@ -88,24 +88,24 @@ class Spider(object):
                 _placeholder = input['placeholder']
                 _text += "{1}name{2}={3}'{0}'{2}, ".format(_name, YELLOW, RESET,
                                                             GREEN) if _name \
-                                                            is not "" else ""
-                _form += "name='{}', ".format(_name) if _name is not "" else ""
+                                                            != "" else ""
+                _form += "name='{}', ".format(_name) if _name != "" else ""
                 _text += "{1}type{2}={3}'{0}'{2}, ".format(_type, YELLOW, RESET,
                                                             GREEN) if _type \
-                                                            is not "" else ""
-                _form += "type='{}', ".format(_type) if _type is not "" else ""
+                                                            != "" else ""
+                _form += "type='{}', ".format(_type) if _type != "" else ""
                 _text += "{1}value{2}={3}'{0}{2}', ".format(_value, YELLOW,
                                                             RESET, GREEN) \
-                                                            if _value is not "" \
+                                                            if _value != "" \
                                                             else ""
-                _form += "value='{}', ".format(_value) if _value is not "" else ""
+                _form += "value='{}', ".format(_value) if _value != "" else ""
                 _text += "{1}placeholder{2}={3}'{0}'{2}".format(_placeholder,
                                                                 YELLOW, RESET,
                                                                 GREEN) \
                                                                 if _placeholder \
-                                                                is not "" else ""
+                                                                != "" else ""
                 _form += "placeholder='{}', ".format(_placeholder) if _placeholder \
-                                                     is not "" else ""
+                                                     != "" else ""
                 _form += "\n"
                 print(_text+RESET)
             self.printed_action.append(i['form_action'])

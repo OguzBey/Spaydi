@@ -116,6 +116,9 @@ class Main(object):
             forms = self.spaydi.output_forms
             self.exit_o = "[-] Exit."
         except:
+            urls = self.spaydi.visited_urls
+            forms = self.spaydi.output_forms
+            self.exit_o = "[-] Exit."
             _, err, _ = sys.exc_info()
             self.logger.error("start() --> {}".format(err))
             self.logger.info("Exit.")
