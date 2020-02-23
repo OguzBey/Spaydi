@@ -1,5 +1,5 @@
 __author__ = "OguzBey"
-__version__ = "1.5.2"
+__version__ = "1.5.3"
 __email__ = "info@oguzbeg.com"
 
 from modules import spider

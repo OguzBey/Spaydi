@@ -103,10 +103,16 @@ class SqlInjection(object):
             return 3 # continue, if we tested this -> url+parameter
         
         stat = self.br.get(_url)
+        
+        if stat > 400: return 0 # False, Error request
+        
         _old_text = re.sub(self.r_html, '', self.br.page_source)
         # step 2
         _url = _url.replace(url['param'], _param)
         stat = self.br.get(_url)
+        
+        if stat > 400: return 0 # False, Error request
+
         _new_text = re.sub(self.r_html, '', self.br.page_source)
         self.tested_uparams_syntax.append(_tested)
         
