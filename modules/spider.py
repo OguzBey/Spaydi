@@ -86,28 +86,21 @@ class Spider(object):
                 _type = input['type']
                 _value = input['value']
                 _placeholder = input['placeholder']
-                _text += "{1}name{2}={3}'{0}'{2}, ".format(_name, YELLOW, RESET,
-                                                            GREEN) if _name \
-                                                            != "" else ""
+                _textt = "{1}name{2}={3}'{0}'{2}, "
+                _text += _textt.format(_name, YELLOW, RESET, GREEN) if _name != "" else ""
                 _form += "name='{}', ".format(_name) if _name != "" else ""
-                _text += "{1}type{2}={3}'{0}'{2}, ".format(_type, YELLOW, RESET,
-                                                            GREEN) if _type \
-                                                            != "" else ""
+                _textt = "{1}type{2}={3}'{0}'{2}, "
+                _text += _textt.format(_type, YELLOW, RESET, GREEN) if _type != "" else ""
                 _form += "type='{}', ".format(_type) if _type != "" else ""
-                _text += "{1}value{2}={3}'{0}{2}', ".format(_value, YELLOW,
-                                                            RESET, GREEN) \
-                                                            if _value != "" \
-                                                            else ""
+                _textt = "{1}value{2}={3}'{0}{2}', "
+                _text += _textt.format(_value, YELLOW, RESET, GREEN) if _value != "" else ""
                 _form += "value='{}', ".format(_value) if _value != "" else ""
-                _text += "{1}placeholder{2}={3}'{0}'{2}".format(_placeholder,
-                                                                YELLOW, RESET,
-                                                                GREEN) \
-                                                                if _placeholder \
-                                                                != "" else ""
-                _form += "placeholder='{}', ".format(_placeholder) if _placeholder \
-                                                     != "" else ""
+                _textt = "{1}placeholder{2}={3}'{0}'{2}"
+                _text += _textt.format(_placeholder, YELLOW, RESET, GREEN) if _placeholder != "" else ""
+                _form += "placeholder='{}', ".format(_placeholder) if _placeholder != "" else ""
                 _form += "\n"
                 print(_text+RESET)
+            
             self.printed_action.append(i['form_action'])
             self.output_forms.append(_form)
             print("-"*30+"</FORM>"+"-"*30)
@@ -136,21 +129,27 @@ class Spider(object):
         _url_list = []
         for link in self.visit_urls:
             link = self.clean_link(link)
+            
             if self.just_urn(link) in self.visited_urns:
                 continue
+            
             stat = self.browser.get(url=link, cookie=self.cookie)
             print("{1}{0}{2}".format("--"*40, B_RED, RESET))
             print("{1}[GET]{2} {0}".format(link, B_CYAN, RESET))
             self.visited_urns.append(self.just_urn(link))
             self.visited_urls.append(link)
+            
             if stat in [200, 302, 301]:
                 forms = self.crawler.get_forms(self.browser.page_source, link)
                 self.print_forms(forms)
                 links = self.crawler.get_urls(self.browser.page_source)
+            
                 for i in links:
                     _link = self.set_link(i)
+            
                     if _link and self.just_urn(_link) not in self.visited_urns:
                         _url_list.append(_link)
+        
         del self.visit_urls[:]
         _url_list = list(set(_url_list))
         self.visit_urls = _url_list[:]
@@ -164,14 +163,18 @@ class Spider(object):
         print("{1}[GET]{2} {0} {3}".format(link, B_CYAN, RESET, stat))
         self.visited_urns.append(self.just_urn(link))
         self.visited_urls.append(link)
+        
         if stat in [200, 302, 301]:
             forms = self.crawler.get_forms(self.browser.page_source, link)
             self.print_forms(forms)
             links = self.crawler.get_urls(self.browser.page_source)
+        
             for i in links:
                 _link = self.set_link(i)
+        
                 if _link and self.just_urn(_link) not in self.visited_urns:
                     _url_list.append(_link)
+        
         return _url_list
 
     def t_loop(self):
@@ -182,11 +185,14 @@ class Spider(object):
         th_count = 0
         max_thrad = 5
         l_visit_urls = len(self.visit_urls)
+        
         for link in self.visit_urls:
             link = self.clean_link(link)
+        
             if self.just_urn(link) in self.visited_urns:
                 l_visit_urls -= 1
                 continue
+        
             t = Thread(target=lambda q, arg1: q.put(self.t_process(arg1)), \
                        args=(que, link))
             t.start()
@@ -194,18 +200,24 @@ class Spider(object):
             th_count += 1
             l_visit_urls -= 1
             self.logger.info("Started Thread-{}".format(th_count))
+        
             if th_count%max_thrad == 0:
                 self.logger.info("Waiting for Thread Process...")
+        
                 for t in thread_list:
                     t.join()
                 self.logger.info("Thread Process Finished..")
+        
             elif l_visit_urls < 5:
                 self.logger.info("Waiting for Thread Process...")
+        
                 for t in thread_list:
                     t.join()
                 self.logger.info("Thread Process Finished..")
+        
         while not que.empty():
             _url_list.extend(que.get())
+        
         del self.visit_urls[:]
         _url_list = list(set(_url_list))
         self.visit_urls = _url_list[:]
@@ -236,6 +248,7 @@ class Spider(object):
                     self.loop()
         else:
             print(stat)
+
         return self.visited_urls, self.output_forms
 
 if __name__ == '__main__':

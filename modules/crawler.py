@@ -29,7 +29,7 @@ class Crawler(object):
                                 name:
                                 type:
                                 placeholder:
-                                value
+                                value:
                             }
                         ]
                     }
@@ -46,6 +46,7 @@ class Crawler(object):
             attr.update({'form_method':method})
             c_inputs = []
             inputs = re.findall(r'(<input.*?/?>)', form)
+            
             for i in inputs:
                 input_attr = dict()
                 _name = re.findall(r'name=[\'"]?([^\'"]+)', i)
@@ -63,15 +64,19 @@ class Crawler(object):
                 c_inputs.append(input_attr)
             attr.update({'inputs':c_inputs})
             forms.append(attr)
+        
         return forms
 
     def get_uparameters(self, url):
         # http:www.site.com/index.php?id=12&ex=10&ex2=123
         _url = url.split("?")
         _url2 = _url[-1]
+        
         if re.findall("(\w+=\w*)", _url2):
             params_v = re.findall("(\w+=\w*[\/?.*]?[a-zA-Z0-9\.\-]*)", _url2)
+            
             return params_v if len(params_v) != 0 else False
+        
         return False
 
 if __name__ == '__main__':

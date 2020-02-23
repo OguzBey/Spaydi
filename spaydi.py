@@ -1,5 +1,5 @@
 __author__ = "OguzBey"
-__version__ = "1.5.1"
+__version__ = "1.5.2"
 __email__ = "info@oguzbeg.com"
 
 from modules import spider
@@ -95,7 +95,7 @@ class Main(object):
         _args = self.get_args(self.args)
         if not self.check_args(_args):
             help()
-        if not '--url' in _args:
+        if '--url' not in _args:
             help()
         _check = _args['--check'] if '--check' in _args else None
         if _check: # sqli, XSS, ...
@@ -122,25 +122,30 @@ class Main(object):
             _, err, _ = sys.exc_info()
             self.logger.error("start() --> {}".format(err))
             self.logger.info("Exit.")
+        
         self.write_file(urls, self.links_file_path)
         self.write_file(forms, self.forms_file_path, tire=True)
         print(B_RED+"--"*30+RESET)
         print("[+]{0} Detected url parameters :{1}".format(B_BLUE, RESET))
+        
         for url in urls:
             _text = ""
             uparameters = self.crawler.get_uparameters(url=url)
+        
             if uparameters:
                 for param in uparameters:
                     _url = {}
                     _url.update({'url':url, 'param':param})
                     self.injectable.append(_url)
                 print("{0}[URL] >> {1}{3}{2}{1}".format(B_BLUE, RESET, url, GREEN))
+        
                 for i in uparameters:
                     _text += "{0}{2}{1}, ".format(YELLOW, RESET, i)
                 _text = _text[:-2]
                 print("{0}[P] >> {1}{2}".format(B_BLUE, RESET, _text))
         print(B_RED+"--"*30+RESET)
         ### CHECK VULN ####
+        
         if _check and "sqli" in _check:
             ### SQLi ####
             _check.remove('sqli')

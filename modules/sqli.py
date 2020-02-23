@@ -45,16 +45,20 @@ class SqlInjection(object):
         _tested = "{}--{}".format(_url.split('?')[0], _key)
         if _tested in self.tested_uparams_numeric:
             return 3 # continue, if we tested this -> url+parameter
+        
         if not self.is_numeric(_val):
             return 0 # False
+        
         if self.br.get(_url) != 200:
             return 4 # bad page
+        
         self.tested_uparams_numeric.append(_tested)
         my_id = int(_val)
         new_id = my_id + 1
         _param = "{}={}".format(_key, new_id) # new param
         _url = _url.replace(url['param'], _param)
         url['param'] = _param
+        
         while self.br.get(_url) != 200:
             new_id += 1
             _param = "{}={}".format(_key, new_id) # new param
@@ -68,16 +72,21 @@ class SqlInjection(object):
         _addThis = new_id - my_id
         _param = "{0}={1}+{2}".format(_key, my_id, _addThis)
         _url = _url.replace(url['param'], _param)
+        
         if self.br.get(_url) != 200:
             return 0 # False
+        
         _lsource = re.sub(self.r_html, '', self.br.page_source)
         _ltitle = self.br.page_title
         # final
+        
         if _lsource == _fsource:
             if _ltitle and _ftitle and _ltitle == _ftitle:
                 # oh yes sqli
                 return 1 # True
+
             return 2 # maybe
+        
         return 0
 
     def syntax_err(self, url):
@@ -89,8 +98,10 @@ class SqlInjection(object):
         _param = "{}={}".format(_key, _val) # new param
         _tested = "{}--{}".format(_url.split('?')[0], _key)
         # step 1
+        
         if _tested in self.tested_uparams_syntax:
             return 3 # continue, if we tested this -> url+parameter
+        
         stat = self.br.get(_url)
         _old_text = re.sub(self.r_html, '', self.br.page_source)
         # step 2
@@ -98,11 +109,14 @@ class SqlInjection(object):
         stat = self.br.get(_url)
         _new_text = re.sub(self.r_html, '', self.br.page_source)
         self.tested_uparams_syntax.append(_tested)
+        
         if _old_text == _new_text:
             return 0 # False
+        
         for err in self.errs:
             if err in _new_text:
                 return 1 # True
+        
         return 2 # Possible
 
 

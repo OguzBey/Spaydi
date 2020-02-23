@@ -60,29 +60,48 @@ class Browser(object):
             self._set_info(_resp)
             self.logger.info("get() [GET] --> {} {}".format(url, _resp.status))
             return _resp.status
+
         except HTTPError as e:
             _, err, _ = sys.exc_info()
             self.logger.error("get() -->{2} {0} {1}".format(err, url, e.code))
             return e.code
+
         except:
             _, err, _ = sys.exc_info()
             self.logger.error("get() --> {}".format(err))
-            _req = urllib.request.Request(url=url, headers=self._header(cookie))
-            _resp = urllib.request.urlopen(_req, context=self.gcontext)
-            self._set_info(_resp)
-            return _resp.status
+            try:
+                _req = urllib.request.Request(url=url, headers=self._header(cookie))
+                _resp = urllib.request.urlopen(_req, context=self.gcontext)
+                self._set_info(_resp)
+                return _resp.status
 
+            except Exception as e:
+                print(e)
+                return 666 # My Error Code
 
     def post(self, url:str, data:dict) -> int:
         try:
             data = urlencode(data)
-            _req = urllib.request.Request(url=url, data=data,
-                                          headers=self._header())
-            _resp = urllib.request.urlopen(_req, context=self.gcontext)
+            _req = urllib.request.Request(url=url, data=data, headers=self._header())
+            _resp = urllib.request.urlopen(_req)
             self_set_info(_resp)
             self.logger.info("post() [POST] --> {} {}".format(url, _resp.status))
             return _resp.status
+
         except HTTPError as e:
             _, err, _ = sys.exc_info()
             self.logger.error("post() --> {}".format(err))
             return e.code
+        
+        except:
+            try:
+                data = urlencode(data)
+                _req = urllib.request.Request(url=url, data=data, headers=self._header())
+                _resp = urllib.request.urlopen(_req, context=self.gcontext)
+                self_set_info(_resp)
+                self.logger.info("post() [POST] --> {} {}".format(url, _resp.status))
+                return _resp.status
+            
+            except Exception as e:
+                print(e)
+                return 666 # My Error Code
